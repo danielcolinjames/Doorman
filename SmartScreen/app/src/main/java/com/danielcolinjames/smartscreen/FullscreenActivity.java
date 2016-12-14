@@ -109,8 +109,8 @@ public class FullscreenActivity extends AppCompatActivity {
 
 //    public static final String WIFI = "Wi-Fi";
 //    public static final String ANY = "Any";
-//    private static final String URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=3197";
-    private static final String URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=5164";
+    private static final String URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=3197";
+//    private static final String URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=5164";
 
 //    // Whether there is a Wi-Fi connection.
 //    private static boolean wifiConnected = false;

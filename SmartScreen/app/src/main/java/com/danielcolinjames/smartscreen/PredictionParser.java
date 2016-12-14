@@ -64,6 +64,9 @@ public class PredictionParser {
 //    }
 
     /*
+
+    Sample XML output
+
     <body copyright="All data copyright Toronto Transit Commission 2016.">
         <predictions agencyTitle="Toronto Transit Commission" routeTitle="93-Parkview Hills" routeTag="93" stopTitle="Woodbine Ave At Barker Ave South Side" stopTag="9185">
             <direction title="South - South - 93 Parkview Hills towards Woodbine Station">
@@ -88,9 +91,7 @@ public class PredictionParser {
         parser.require(XmlPullParser.START_TAG, ns, "body");
         int count = 1;
 
-        while (parser.next() != XmlPullParser.END_TAG) {
-
-            //Log.d("DEBUG", String.valueOf(count));
+        while (parser.next() != XmlPullParser.END_DOCUMENT) {
 
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
@@ -101,17 +102,28 @@ public class PredictionParser {
             count++;
             Log.i("INFO", "readFeed, looking at this tag: " + name);// + parser.toString());
             // starts by looking for the predictions tag
+
             if (name.equals("predictions")) {
 
                 Log.i("INFO", "STOP NAME: " + parser.getAttributeValue(ns, "stopTitle"));
-                predictions.add(readPrediction(parser));
+
+                Prediction newPrediction = readPrediction(parser);
+
+                // sometimes the XML document has <predictions> tags with nothing in them
+                if (!newPrediction.nextBusTimes.isEmpty()) {
+                    predictions.add(newPrediction);
+                }
                 //
 
             } else {
-                //skip(parser);
+//                skip(parser);
                 parser.nextTag();
             }
+            parser.nextTag();
         }
+
+        Log.i("INFO", "Finished readFeed() while loop");
+
         for (int i = 0; i < predictions.size(); i++) {
             Log.d("DEBUG", "predictions(" + i + ") = " + predictions.get(i).toString());
         }
@@ -143,13 +155,11 @@ public class PredictionParser {
             count++;
 
             if (parser.getEventType() != XmlPullParser.START_TAG) {
-                Log.d("DEBUG", "readPrediction: Skipping " + parser.getName() + " : " + parser.toString());
+                Log.d("DEBUG", "readPrediction: Skipping: " + parser.getName());
                 continue;
             }
 
             String tagName = parser.getName();
-
-            //Log.i("readPrediction", tagName);
 
             if (tagName.equals("prediction")) {
                 routeTag = readRouteTag(parser);
@@ -160,12 +170,11 @@ public class PredictionParser {
                 nextBusTimes.add(seconds);
                 //parser.nextTag();
             }
-
         }
 
-        for (int i = 0; i < nextBusTimes.size(); i++) {
-            Log.d("DEBUG", "NEXTBUSTIMES(" + i + "): " + nextBusTimes.get(i));
-        }
+//        for (int i = 0; i < nextBusTimes.size(); i++) {
+//            Log.d("DEBUG", "NEXTBUSTIMES(" + i + "): " + nextBusTimes.get(i));
+//        }
 
         return new Prediction(routeTag, nextBusTimes);
     }
@@ -214,6 +223,8 @@ public class PredictionParser {
         if (parser.getEventType() != XmlPullParser.START_TAG) {
             throw new IllegalArgumentException();
         }
+
+        Log.d("DEBUG", "skip() called on " + parser.getName());
 
         int depth = 1;
         while (depth != 0) {
