@@ -29,6 +29,23 @@ public class PredictionParser {
     private static final String ns = null;
 
 
+    public static class Prediction {
+        public String routeTag;
+        ArrayList<Integer> nextBusTimes;
+
+        private Prediction(String routeTag, ArrayList<Integer> nextBusTimes) {
+            this.routeTag = routeTag;
+            this.nextBusTimes = nextBusTimes;
+        }
+        private void setRouteTag(String routeTag) {
+            this.routeTag = routeTag;
+        }
+
+        private void setNextBusTimes(ArrayList<Integer> nextBusTimes) {
+            this.nextBusTimes = nextBusTimes;
+        }
+    }
+
     public List parse(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -105,9 +122,12 @@ public class PredictionParser {
 
             if (name.equals("predictions")) {
 
-                Log.i("INFO", "STOP NAME: " + parser.getAttributeValue(ns, "stopTitle"));
-
+//                Log.i("INFO", "STOP NAME: " + parser.getAttributeValue(ns, "stopTitle"));
+//
+                String routeTag = parser.getAttributeValue(ns, "routeTag");
                 Prediction newPrediction = readPrediction(parser);
+
+                newPrediction.setRouteTag(routeTag);
 
                 // sometimes the XML document has <predictions> tags with nothing in them
                 if (!newPrediction.nextBusTimes.isEmpty()) {
@@ -122,23 +142,15 @@ public class PredictionParser {
             parser.nextTag();
         }
 
-        Log.i("INFO", "Finished readFeed() while loop");
+//        Log.i("INFO", "Finished readFeed() while loop");
 
-        for (int i = 0; i < predictions.size(); i++) {
-            Log.d("DEBUG", "predictions(" + i + ") = " + predictions.get(i).toString());
-        }
+//        for (int i = 0; i < predictions.size(); i++) {
+//            Log.d("DEBUG", "predictions(" + i + ") = " + predictions.get(i).toString());
+//        }
+
         return predictions;
     }
 
-    public static class Prediction {
-        public final String routeTag;
-        ArrayList<Integer> nextBusTimes;
-
-        private Prediction(String routeTag, ArrayList<Integer> nextBusTimes) {
-            this.routeTag = routeTag;
-            this.nextBusTimes = nextBusTimes;
-        }
-    }
 
     private Prediction readPrediction(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "predictions");
@@ -148,14 +160,14 @@ public class PredictionParser {
 
         //Log.i("depth", String.valueOf(parser.getDepth()));
 
-        int count = 1;
+//        int count = 1;
 
         while (parser.next() != XmlPullParser.END_TAG) {
-            Log.i("INFO", "RPCount = " + count + ", Current tag being analyzed: " + parser.getName());
-            count++;
+//            Log.i("INFO", "RPCount = " + count + ", Current tag being analyzed: " + parser.getName());
+//            count++;
 
             if (parser.getEventType() != XmlPullParser.START_TAG) {
-                Log.d("DEBUG", "readPrediction: Skipping: " + parser.getName());
+//                Log.d("DEBUG", "readPrediction: Skipping: " + parser.getName());
                 continue;
             }
 
@@ -163,10 +175,10 @@ public class PredictionParser {
 
             if (tagName.equals("prediction")) {
                 routeTag = readRouteTag(parser);
-                Log.i("INFO", "branch = " + routeTag);
+//                Log.i("INFO", "branch = " + routeTag);
 //            } else if (tagName.equals("prediction")) {
                 int seconds = readSeconds(parser);
-                Log.i("INFO", "seconds = " + String.valueOf(seconds));
+//                Log.i("INFO", "seconds = " + String.valueOf(seconds));
                 nextBusTimes.add(seconds);
                 //parser.nextTag();
             }

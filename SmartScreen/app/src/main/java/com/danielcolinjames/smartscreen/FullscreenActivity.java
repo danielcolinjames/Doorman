@@ -6,6 +6,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Xml;
 import android.view.MotionEvent;
@@ -31,6 +32,13 @@ import java.util.List;
  */
 public class FullscreenActivity extends AppCompatActivity {
 
+    // 3197 is the stop closest to my house going toward Woodbine station, and 5164 is a stop that runs later
+    // so that I can test my code at night after the 91 and 93 have stopped running
+
+        private static final String URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=3197";
+//    private static final String URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=5164";
+
+
     private class DownloadXmlTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
@@ -38,15 +46,10 @@ public class FullscreenActivity extends AppCompatActivity {
                 Log.i("url", urls[0]);
                 return loadXmlFromNetwork(urls[0]);
             } catch (IOException e) {
-                //return getResources().getString(R.string.connection_error);
                 Log.e("IO Error", e.getMessage());
-                return "error1";
+                return e.getMessage();
             } catch (XmlPullParserException e) {
-                //return getResources().getString(R.string.xml_error);
-                //return "error2";
                 Log.e("XML error", e.getMessage());
-                //e.printStackTrace();
-                //Log.e("error", e.toString());
                 return e.getMessage();
             }
         }
@@ -55,7 +58,7 @@ public class FullscreenActivity extends AppCompatActivity {
         public void onPostExecute(String result) {
             //setContentView(R.layout.activity_fullscreen);
             // Displays the HTML string in the UI via a WebView
-            TextView textOutput = (TextView) findViewById(R.id.outputText);
+            TextView textOutput = (TextView) findViewById(R.id.BusTimes);
             textOutput.setText(result);
 
             Log.i("INFO onPostExecute", result);
@@ -84,9 +87,21 @@ public class FullscreenActivity extends AppCompatActivity {
 
         String output = "";
         for (PredictionParser.Prediction prediction : predictions) {
+
             output += prediction.routeTag + ": ";
-            output += prediction.nextBusTimes + "\n";
-            Log.i("PREDICTION OUTPUT", String.valueOf(prediction.nextBusTimes));
+            for (int i = 0; i < prediction.nextBusTimes.size(); i++) {
+                String timeToArrival = DateUtils.formatElapsedTime(prediction.nextBusTimes.get(i));
+                output += timeToArrival;
+
+                if (i != prediction.nextBusTimes.size() - 1) {
+                    output += ",  ";
+                }
+            }
+            output += "\n\n";
+//
+//            output += prediction.routeTag + ": ";
+//            output += prediction.nextBusTimes + "\n";
+//            Log.i("PREDICTION OUTPUT", String.valueOf(prediction.nextBusTimes));
         }
         //return htmlString.toString();
         return output;
@@ -104,32 +119,6 @@ public class FullscreenActivity extends AppCompatActivity {
         // Starts the query
         conn.connect();
         return conn.getInputStream();
-    }
-
-
-//    public static final String WIFI = "Wi-Fi";
-//    public static final String ANY = "Any";
-    private static final String URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=3197";
-//    private static final String URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=5164";
-
-//    // Whether there is a Wi-Fi connection.
-//    private static boolean wifiConnected = false;
-//    // Whether there is a mobile connection.
-//    private static boolean mobileConnected = false;
-//    // Whether the display should be refreshed.
-//    public static boolean refreshDisplay = true;
-//    public static String sPref = null;
-
-    // Uses AsyncTask to download the XML feed from stackoverflow.com.
-    public void loadPage() {
-//        if((sPref.equals(ANY)) && (wifiConnected || mobileConnected)) {
-//            new DownloadXmlTask().execute(URL);
-//        }
-//        else if ((sPref.equals(WIFI)) && (wifiConnected)) {
-            new DownloadXmlTask().execute(URL);
-//        } else {
-//            // show error
-//        }
     }
 
     /**
@@ -169,14 +158,6 @@ public class FullscreenActivity extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-
-
-
-
-
-
-
-
 
     private View mControlsView;
     private final Runnable mShowPart2Runnable = new Runnable() {
@@ -222,7 +203,6 @@ public class FullscreenActivity extends AppCompatActivity {
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
 
-
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,10 +214,30 @@ public class FullscreenActivity extends AppCompatActivity {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        //findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
 
-        loadPage();
+        new DownloadXmlTask().execute(URL);
 
+        Thread t = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(5000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                new DownloadXmlTask().execute(URL);
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+
+        t.start();
     }
 
     @Override

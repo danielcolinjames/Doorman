@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
+    android:background="#eee"
     tools:context="com.danielcolinjames.smartscreen.FullscreenActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
@@ -14,14 +14,13 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:keepScreenOn="true"
-        android:text="@string/dummy_content"
         android:textColor="#33b5e5"
         android:textSize="50sp"
         android:textStyle="bold" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
@@ -35,23 +34,30 @@
             android:background="@color/black_overlay"
             android:orientation="horizontal"
             tools:ignore="UselessParent">
-
-            <Button
-                android:id="@+id/dummy_button"
-                style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/dummy_button" />
-
         </LinearLayout>
 
-    </FrameLayout>
+        <TextClock
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/TimeBar"
+            android:textSize="30sp"
+            android:padding="30dp"
+            tools:ignore="NewApi"
+            android:keepScreenOn="true" />
 
-    <TextView
-        android:text="TextView"
-        android:layout_width="match_parent"
-        android:layout_height="290dp"
-        android:id="@+id/outputText" />
+        <TextView
+            android:text="Unable to retrieve bus times"
+            android:layout_width="match_parent"
+            android:layout_height="151dp"
+            android:layout_below="@id/TimeBar"
+            android:id="@+id/BusTimes"
+            android:textSize="20sp"
+            android:padding="25px" />
+
+
+
+    </RelativeLayout>
 
 </FrameLayout>
